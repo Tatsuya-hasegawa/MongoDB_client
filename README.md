@@ -18,6 +18,8 @@ This tools are python client for downloading records from mongodb to local csv f
 - - using find_one({}) of pymongo instead of find() for checking the target data schema.
 - dump_records2csv.py *database_name* *table_name*
 - - using find({}) i.e; download all records of the database/table
+- - fetch documents per 10000 records
+- - converting pandas df per 10000 documents
 
 ## (FYI) Test Environment
 1. Python 3.5.2
