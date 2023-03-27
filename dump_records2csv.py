@@ -14,8 +14,8 @@ def dump2csv(filename,records_json,counts):
 			if c==0:
 				print("### record schema check")
 				pprint.pprint(row_json)
-				df_json = pd.io.json.json_normalize(row_json)
 			c+=1
+			df_json = pd.io.json.json_normalize(row_json)
 			df_master = pd.concat([df_master, df_json])
 		df_master.to_csv(filename, index=False, encoding='utf-8')
 		print("# Saved to %s"%filename)
