@@ -1,7 +1,6 @@
 # MongoDB_client
 
-MongoDB Client with connection string
-https://www.mongodb.com/docs/manual/reference/connection-string/
+MongoDB Client with [connection string](https://www.mongodb.com/docs/manual/reference/connection-string/)
 
 ## Description
 This tools are python client for downloading records from mongodb to local csv file. 
