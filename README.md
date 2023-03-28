@@ -12,27 +12,26 @@ This tools are python client for downloading records from mongodb to local csv f
 
 ## Scripts
 
-- list_databases_tables_counts.py
-- - listing database and table name from the target mongodb.
-- test_1record_dump_records2csv.py *database_name* *table_name*
-- - using find_one({}) of pymongo instead of find() for checking the target data schema.
+### list_databases_tables_counts.py
+- listing database and table name from the target mongodb.
 
+### test_1record_dump_records2csv.py *database_name* *table_name*
+- using find_one({}) of pymongo instead of find() for checking the target data schema.
 
-- dump_records2csv.py *database_name* *table_name*
-- - using find({}) i.e; download all records of the database/table
-- - fetch documents every 10000 records
-- - converting pandas df every document, so if documents are too much, you feels slow.
+### dump_records2csv.py *database_name* *table_name*
+- using find({}) i.e; download all records of the database/table
+- fetch documents every 10000 records
+- converting pandas df every document, so if documents are too much, you feels slow.
 
-
-- query_records2csv.py *database_name* *table_name* *query* *timefield*
-- - using find(*query*)
-- - Argument examples (timestamp is the timestamp field in this case, status and portnum are just examples.)
-- - - query_records2csv.py *database_name* *table_name* '{"$and":[{"status":True},{"portnum":80}]}'
-- - - query_records2csv.py *database_name* *table_name* '{"timestamp":{"$gt":1677633240}}' timestamp
-- - - query_records2csv.py *database_name* *table_name* '{"timestamp":{"$gt":1677633240,"$lte":1679968394}}' timestamp
-- - - query_records2csv.py *database_name* *table_name* '{"$and":[{"timestamp":{"$gt":1677633240}},{"portnum":80}]}' timestamp
-- - Only epoch time is available as timestamp value to this script, it's converted to datetime obj inside this script.
-- - Timezone is not considered in the conversion, it will follow the executing system timezone.
+### query_records2csv.py *database_name* *table_name* *query* *timefield*
+- using find(*query*)
+- Argument examples (timestamp is the timestamp field in this case, status and portnum are just examples.)
+- - query_records2csv.py *database_name* *table_name* '{"$and":[{"status":True},{"portnum":80}]}'
+- - query_records2csv.py *database_name* *table_name* '{"timestamp":{"$gt":1677633240}}' timestamp
+- - query_records2csv.py *database_name* *table_name* '{"timestamp":{"$gt":1677633240,"$lte":1679968394}}' timestamp
+- - query_records2csv.py *database_name* *table_name* '{"$and":[{"timestamp":{"$gt":1677633240}},{"portnum":80}]}' timestamp
+- Only epoch time is available as timestamp value to this script, it's converted to datetime obj inside this script.
+- Timezone is not considered in the conversion, it will follow the executing system timezone.
 
 **NOTE: scripts write the connection string to stdout by `print("# connecting to %s\n"%target_mongo)` line**
 
