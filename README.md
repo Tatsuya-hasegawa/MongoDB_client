@@ -3,7 +3,7 @@
 MongoDB Client with [connection string](https://www.mongodb.com/docs/manual/reference/connection-string/)
 
 ## Description
-This tools are python client for downloading records from mongodb to local csv file. 
+These tools are python client programs for `only retrieving` db records from mongodb and then store them to local csv file. 
 
 ## Requirement
 
@@ -37,10 +37,15 @@ This tools are python client for downloading records from mongodb to local csv f
 
 **Please comment out if you don't prefer this in terms of security like your mongodb's user/pass credential showing**
 
-## (FYI) Test Environment
-1. Python 3.5.2
-2. pymongo-3.13.0, dnspython-1.16.0
-3. numpy-1.18.5 pandas-0.24.2 python-dateutil-2.8.2 pytz-2023.2
+## Test Environment
+1. OS: Ubuntu 16.04
+- Python 3.5.2
+- pymongo-3.13.0, dnspython-1.16.0
+- numpy-1.18.5 pandas-0.24.2 python-dateutil-2.8.2 pytz-2023.2
+2. OS: macOS 12.2
+- Python 3.8.8
+- pymongo-4.3.3, dnspython-2.3.0
+- numpy-1.24.2 pandas-1.5.3 python-dateutil-2.8.2 pytz-2023.2 six-1.16.0
 
 ## Altenative method
 MongoDB's copy functionality
