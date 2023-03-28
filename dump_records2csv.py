@@ -5,6 +5,8 @@ from pymongo import MongoClient,CursorType
 from datetime import datetime
 import pandas as pd
 
+WINDOW_SIZE = 10000
+
 def dump2csv(filename,records_json,counts):
 	try:
 		df_master = pd.DataFrame()
@@ -15,11 +17,16 @@ def dump2csv(filename,records_json,counts):
 			if c==0:
 				print("### record schema check")
 				pprint.pprint(row_json)
-			if c%10000==0:
+			elif c%WINDOW_SIZE==0:
 				print("# [%s] dataframe conversion in progress: %d/%d"%(datetime.now().strftime('%Y-%m-%dT%H-%M-%SZ'),c,total))
 				pprint.pprint(row_json)
+				sys.stdout.flush()
 			c+=1
-			df_json = pd.io.json.json_normalize(row_json)
+			try:
+				df_json = pd.io.json.json_normalize(row_json)
+			except Exception as e:
+				print("E| json_normalize error (%s) by %s"%(row_json, traceback.format_exc()))
+				continue
 			df_master = pd.concat([df_master, df_json],sort=False)
 		df_master.to_csv(filename, index=False, encoding='utf-8')
 		print("# Saved to %s"%filename)
@@ -49,11 +56,11 @@ def fetch_mongo_records(mongodb_url,database_name,table_name):
 			# https://stackoverflow.com/questions/52904815/using-natural-sort-in-pymongo-mongodb
 			# without limit [ records_json.append(record) for record in collection.find({},cursor_type=CursorType.EXHAUST).sort([( '$natural', 1 )]) ]
 			position = 0
-			WINDOW_SIZE = 10000
 			while position < counts:
 				# E| Can't use limit and exhaust together.
 				[ records_json.append(record) for record in collection.find({}).sort([( '$natural', 1 )]).skip(position).limit(WINDOW_SIZE) ]
 				print("# [%s] position in progress: %d, stored record counts = %d"%(datetime.now().strftime('%Y-%m-%dT%H-%M-%SZ'),position,len(records_json)))
+				sys.stdout.flush()
 				position += WINDOW_SIZE
 
 
