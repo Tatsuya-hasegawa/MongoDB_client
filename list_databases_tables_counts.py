@@ -17,11 +17,14 @@ def list_dbs(mongodb_url):
 			try:
 				if float(pymongo_version.replace(".","")) >= 370:
 					tables = client[database_name].list_collection_names()
+					for table_name in tables:
+						counts = client[database_name][table_name].estimated_document_count({})
+						print("T|\t\t - %s (%d records)"%(table_name,counts))
 				else:
 					tables = client[database_name].collection_names(include_system_collections=False)
-				for table_name in tables:
-					counts = client[database_name][table_name].count_documents({})
-					print("T|\t\t - %s (%d records)"%(table_name,counts))
+					for table_name in tables:
+						counts = client[database_name][table_name].count_documents({})
+						print("T|\t\t - %s (%d records)"%(table_name,counts))
 			except Exception as e:
 				print("E| %s on %s"%(str(e),database_name))
 
