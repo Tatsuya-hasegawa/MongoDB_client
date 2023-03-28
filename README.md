@@ -20,6 +20,18 @@ This tools are python client for downloading records from mongodb to local csv f
 - - using find({}) i.e; download all records of the database/table
 - - fetch documents every 10000 records
 - - converting pandas df every document, so if documents are too much, you feels slow.
+- query_records2csv.py *database_name* *table_name* *query* *timefield*
+- - using find(*query*)
+- - examples
+- - - query_records2csv.py *database_name* *table_name* '{"$and":[{"status":True},{"portnum":80}]}'
+- - - query_records2csv.py *database_name* *table_name* '{"timestamp":{"$gt":1677633240}}' timestamp
+- - - query_records2csv.py *database_name* *table_name* '{"timestamp":{"$gt":1677633240,"$lte":1679968394}}' timestamp
+- - - query_records2csv.py *database_name* *table_name* '{"$and":[{"timestamp":{"$gt":1677633240}},{"port":80}]}' timestamp
+- - Only epoch time is available as timestamp value to this script, it's converted to datetime obj inside this script.
+- - Timezone is not considered in the conversion, it will follow the executing system timezone.
+
+**NOTE: scripts write the connection string to stdout by `print("# connecting to %s\n"%target_mongo)` line**
+** Please comment out if you don't prefer this in terms of security like your mongodb's user/pass credential showing**
 
 ## (FYI) Test Environment
 1. Python 3.5.2
