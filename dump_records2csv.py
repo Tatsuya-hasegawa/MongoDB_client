@@ -39,8 +39,13 @@ def fetch_mongo_records(mongodb_url,database_name,table_name):
 		try:
 			db = client[database_name]
 			collection = db[table_name]
-			if int(pymongo_major) >= 4 or ( int(pymongo_major) >= 3 and int(pymongo_minor) >= 7):
-				counts = collection.estimated_document_count({})
+			try: 
+				counts = collection.estimated_document_count({}) 
+			except:
+				try: 
+					counts = collection.estimated_document_count() # e.g. 3.13.0
+				except: 
+					counts = collection.count_documents({}) # unexpected version
 			else:
 				counts = collection.count_documents({})
 			print("[%s](%s) %drecords"%(database_name,table_name,counts))
