@@ -1,37 +1,25 @@
 import sys
 from os import environ as os_environ
 import pprint,traceback
-from pymongo import MongoClient,CursorType
+from pymongo import MongoClient, version as pymongo_version 
 from datetime import datetime
 import pandas as pd
+import ast
 
 WINDOW_SIZE = 10000
 
 def dump2csv(filename,records_json,counts):
+	print("# using pandas version %s"%pd.__version__)
 	try:
-		df_master = pd.DataFrame()
-		c=0
-		total = len(records_json)
-		for row_json in records_json:
-			del row_json["_id"]
-			if c==0:
-				print("### record schema check")
-				pprint.pprint(row_json)
-			elif c%WINDOW_SIZE==0:
-				print("# [%s] dataframe conversion in progress: %d/%d"%(datetime.now().strftime('%Y-%m-%dT%H-%M-%SZ'),c,total))
-				pprint.pprint(row_json)
-				sys.stdout.flush()
-			c+=1
-			try:
-				df_json = pd.io.json.json_normalize(row_json)
-			except Exception as e:
-				print("E| json_normalize error (%s) by %s"%(row_json, traceback.format_exc()))
-				continue
-			df_master = pd.concat([df_master, df_json],sort=False)
-		df_master.to_csv(filename, index=False, encoding='utf-8')
+		if float(pd.__version__.replace(".","")) >= 100:
+			df = pd.json_normalize(records_json)
+		else:
+			df = pd.io.json.json_normalize(records_json)
+		df.to_csv(filename, index=False, encoding='utf-8')
 		print("# Saved to %s"%filename)
 	except Exception as e:
 		print("E|<%s> by %s"%(filename, traceback.format_exc()))
+		return
 
 	file_rows = sum([1 for _ in open(filename)])
 	print("# file row num: %d"%file_rows)
@@ -48,7 +36,10 @@ def fetch_mongo_records(mongodb_url,database_name,table_name):
 		try:
 			db = client[database_name]
 			collection = db[table_name]
-			counts = collection.count_documents({})
+			if float(pymongo_version.replace(".","")) >= 370:
+				counts = collection.estimated_document_count({})
+			else:
+				counts = collection.count_documents({})
 			print("[%s](%s) %drecords"%(database_name,table_name,counts))
 
 			# faster fetch way from belows
@@ -65,7 +56,7 @@ def fetch_mongo_records(mongodb_url,database_name,table_name):
 
 
 			# dump to csv file
-			print("\n # CSV dump phaise")
+			print("\n# CSV dump phaise")
 			timestr = datetime.now().strftime('%Y-%m-%dT%H-%M-%SZ')
 			filename = database_name + "_" + table_name + "_" + str(counts) + "records_" + timestr + ".csv"
 			dump2csv(filename,records_json,counts)
