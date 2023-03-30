@@ -10,8 +10,9 @@ WINDOW_SIZE = 10000
 
 def dump2csv(filename,records_json,counts):
 	print("# using pandas version %s"%pd.__version__)
+	pandas_major,pandas_minor,pandas_micro = pd.__version__.split(".")
 	try:
-		if float(pd.__version__.replace(".","")) >= 100:
+		if int(pandas_major) >= 1:
 			df = pd.json_normalize(records_json)
 		else:
 			df = pd.io.json.json_normalize(records_json)
@@ -32,11 +33,13 @@ def fetch_mongo_records(mongodb_url,database_name,table_name):
 	with MongoClient(mongodb_url) as client:
 		assert client is not None
 		print("# %s\n"%client)
+		print("# using pymongo version: %s"%pymongo_version)
+		pymongo_major,pymongo_minor,pymongo_micro = pymongo_version.split(".")		
 		records_json = []
 		try:
 			db = client[database_name]
 			collection = db[table_name]
-			if float(pymongo_version.replace(".","")) >= 370:
+			if int(pymongo_major) >= 3 and int(pymongo_minor) >= 7:
 				counts = collection.estimated_document_count({})
 			else:
 				counts = collection.count_documents({})
