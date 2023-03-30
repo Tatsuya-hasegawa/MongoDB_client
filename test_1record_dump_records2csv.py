@@ -6,7 +6,6 @@ from datetime import datetime
 from pandas.io.json import json_normalize
 
 def dump2csv(filename,records_json):
-	del records_json["_id"]
 	try:
 		df_json = json_normalize(records_json)
 		df_json.to_csv(filename, encoding='utf-8')
