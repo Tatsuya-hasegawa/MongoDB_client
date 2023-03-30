@@ -16,10 +16,16 @@ def list_dbs(mongodb_url):
 			if isinstance(database_name,dict):
 				database_name = database_name.get("name")
 			try:
-				if int(pymongo_major) >= 3 and int(pymongo_minor) >= 7:
+				if int(pymongo_major) >= 4 or ( int(pymongo_major) >= 3 and int(pymongo_minor) >= 7):
 					tables = client[database_name].list_collection_names()
 					for table_name in tables:
-						counts = client[database_name][table_name].estimated_document_count({})
+						try: 
+							counts = client[database_name][table_name].estimated_document_count({}) 
+						except:
+							try: 
+								counts = client[database_name][table_name].estimated_document_count() # e.g. 3.13.0
+							except: 
+								counts = client[database_name][table_name].count_documents({}) # unexpected version
 						print("T|\t\t - %s (%d records)"%(table_name,counts))
 				else:
 					tables = client[database_name].collection_names(include_system_collections=False)
