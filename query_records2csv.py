@@ -1,7 +1,7 @@
 import sys
 from os import environ as os_environ
 import pprint,traceback
-from pymongo import MongoClient,CursorType
+from pymongo import MongoClient, version as pymongo_version 
 from datetime import datetime
 import pandas as pd
 import ast
@@ -9,27 +9,13 @@ import ast
 WINDOW_SIZE = 10000
 
 def dump2csv(filename,records_json,counts):
+	print("# using pandas version %s"%pd.__version__)
 	try:
-		df_master = pd.DataFrame()
-		c=0
-		total = len(records_json)
-		for row_json in records_json:
-			del row_json["_id"]
-			if c==0:
-				print("### record schema check")
-				pprint.pprint(row_json)
-			elif c%WINDOW_SIZE==0:
-				print("# [%s] dataframe conversion in progress: %d/%d"%(datetime.now().strftime('%Y-%m-%dT%H-%M-%SZ'),c,total))
-				pprint.pprint(row_json)
-				sys.stdout.flush()
-			c+=1
-			try:
-				df_json = pd.io.json.json_normalize(row_json)
-			except Exception as e:
-				print("E| json_normalize error (%s) by %s"%(row_json, traceback.format_exc()))
-				continue
-			df_master = pd.concat([df_master, df_json],sort=False)
-		df_master.to_csv(filename, index=False, encoding='utf-8')
+		if float(pd.__version__.replace(".","")) >= 100:
+			df = pd.json_normalize(records_json)
+		else:
+			df = pd.io.json.json_normalize(records_json)
+		df.to_csv(filename, index=False, encoding='utf-8')
 		print("# Saved to %s"%filename)
 	except Exception as e:
 		print("E|<%s> by %s"%(filename, traceback.format_exc()))
@@ -47,7 +33,6 @@ def adjust_query(query,timefield):
 	query_json = ast.literal_eval(query)
 
 	if timefield:
-		original = query_json
 		if "$and" in query_json.keys() or "$or" in query_json.keys():
 			try:
 				for complex_name in query_json:
@@ -76,6 +61,7 @@ def fetch_mongo_records(mongodb_url,database_name,table_name,query,timefield):
 	with MongoClient(mongodb_url) as client:
 		assert client is not None
 		print("# %s\n"%client)
+		print("# using pymongo version: %s"%pymongo_version)
 		records_json = []
 		try:
 			db = client[database_name]
@@ -87,7 +73,11 @@ def fetch_mongo_records(mongodb_url,database_name,table_name,query,timefield):
 				print("E| Did you quote your query by using single-quote or double-quote with escaping inside double-quote ?")
 				return
 			print("## set query into find():  %s "%query_json)
-			counts = collection.count_documents(query_json)
+			
+			if float(pymongo_version.replace(".","")) >= 370:
+				counts = collection.estimated_document_count(query_json)
+			else:
+				counts = collection.count_documents(query_json)
 			print("[%s](%s) ?%s \n%drecords"%(database_name,table_name,query_json,counts))
 			# faster fetch way from belows
 			# https://stackoverflow.com/questions/38647962/how-to-quickly-fetch-all-documents-mongodb-pymongo
@@ -103,7 +93,7 @@ def fetch_mongo_records(mongodb_url,database_name,table_name,query,timefield):
 
 
 			# dump to csv file
-			print("\n # CSV dump phaise")
+			print("\n# CSV dump phaise")
 			timestr = datetime.now().strftime('%Y-%m-%dT%H-%M-%SZ')
 			filename = database_name + "_" + table_name  + "_" + str(counts) + "records_" + timestr + ".csv"
 			dump2csv(filename,records_json,counts)
