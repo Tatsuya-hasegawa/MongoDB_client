@@ -6,7 +6,8 @@ def list_dbs(mongodb_url):
 		assert client is not None
 		print("# %s\n"%client)
 		print("# using pymongo version: %s"%pymongo_version)
-		if float(pymongo_version.replace(".","")) >= 400:
+		pymongo_major,pymongo_minor,pymongo_micro = pymongo_version.split(".")
+		if int(pymongo_major) >= 4:
 			databases = client.list_databases()
 		else: 
 			databases = client.database_names()
@@ -15,7 +16,7 @@ def list_dbs(mongodb_url):
 			if isinstance(database_name,dict):
 				database_name = database_name.get("name")
 			try:
-				if float(pymongo_version.replace(".","")) >= 370:
+				if int(pymongo_major) >= 3 and int(pymongo_minor) >= 7:
 					tables = client[database_name].list_collection_names()
 					for table_name in tables:
 						counts = client[database_name][table_name].estimated_document_count({})
