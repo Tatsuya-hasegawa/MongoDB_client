@@ -75,7 +75,7 @@ def fetch_mongo_records(mongodb_url,database_name,table_name,query,timefield):
 				return
 			print("## set query into find():  %s "%query_json)
 			
-			if int(pymongo_major) >= 3 and int(pymongo_minor) >= 7:
+			if int(pymongo_major) >= 4 or ( int(pymongo_major) >= 3 and int(pymongo_minor) >= 7):
 				counts = collection.estimated_document_count(query_json)
 			else:
 				counts = collection.count_documents(query_json)
